@@ -120,10 +120,23 @@ function M.buildCommitUi()
 	M.popupMultiselection("Adicionar arquivos ao commit", files, function(selectedItems)
 		M.popupSelectTemplate(function(template)
 			M.applyTemplate(template, function(commit)
-				local commandAdd = "add " .. table.concat(selectedItems, " ")
-				local commandCommit = "commit -m '" .. commit:gsub("'", "\\'") .. "'"
+				local handledCommit = commit:gsub("'", "\\'")
+				local handledAdd = table.concat(selectedItems, " ")
+				local commandAdd = ""
+				if handledAdd then
+					commandAdd = "add " .. handledAdd
+				else
+					commandAdd = "add ."
+				end
+				local commandCommit = ""
+				if handledCommit then
+					commandCommit = "commit -m '" .. handledCommit .. "'"
+				else
+					commandCommit = "commit -a"
+				end
 				vim.cmd(":Git " .. commandAdd)
 				vim.cmd(":Git " .. commandCommit)
+				vim.cmd(":Git push")
 			end)
 		end)
 	end)

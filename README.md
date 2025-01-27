@@ -8,7 +8,7 @@ um plugin para neovim para aplicar patterns de commits git e evitar erros de dig
 
 ```lua
 return {
-  dir = "~/Documentos/git-commit-tool.nvim",
+  "francivaldo4334/git-commit-tool.nvim",
   dependencies = {
     "nvim-lua/plenary.nvim",
     {
