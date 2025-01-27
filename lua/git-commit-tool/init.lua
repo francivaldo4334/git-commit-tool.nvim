@@ -1,6 +1,6 @@
 local popup = require("plenary.popup")
-local TEMPLATES = {}
 local M = {}
+M.TEMPLATES = {}
 local borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" }
 local function getArgs(event)
 	local argsstring = event.args or ""
@@ -16,7 +16,7 @@ M.setToken = function(username, token)
 	vim.cmd(": lua git.cmd('git config --global credential.helper store')")
 	vim.fn.system(string.format('echo "https://%s:%s@github.com" > ~/.git-credentials', username, token))
 end
-local function getGitFileNoCommited()
+function M.getGitFileNoCommited()
 	local handle = vim.fn.system("git status --porcelain") .. "\n"
 	local files = {}
 	for line in handle:gmatch("[^\r\n]+") do
@@ -27,7 +27,8 @@ local function getGitFileNoCommited()
 	end
 	return files
 end
-local function popupMultiselection(title, items, on_select_items, default_line)
+
+function M.popupMultiselection(title, items, on_select_items, default_line)
 	local options = {}
 	local nextOption = "[AVANÇAR]"
 	for _, value in ipairs(items) do
@@ -59,14 +60,16 @@ local function popupMultiselection(title, items, on_select_items, default_line)
 						default_line = i
 					end
 				end
-				popupMultiselection(title, items, on_select_items, default_line)
+				M.popupMultiselection(title, items, on_select_items, default_line)
 			end
 		end,
 	})
 	vim.api.nvim_win_set_cursor(win_id, { default_line or 1, 0 })
 end
-local function popupSelectTemplate(on_select)
-	popup.create(TEMPLATES, {
+
+function M.popupSelectTemplate(on_select)
+	print(vim.inspect(M.TEMPLATES))
+	popup.create(M.TEMPLATES, {
 		title = "Selecionar template",
 		cursorline = true,
 		borderchars = borderchars,
@@ -76,8 +79,9 @@ local function popupSelectTemplate(on_select)
 		end,
 	})
 end
+
 ---@param template string
-local function applyTemplate(template, on_commit)
+function M.applyTemplate(template, on_commit)
 	local commit = template
 	local vars = {}
 	local key = 0
@@ -111,26 +115,26 @@ local function applyTemplate(template, on_commit)
 	key, value = next(vars)
 	popupSetVar(value)
 end
+
 function M.buildCommitUi()
-	local files = getGitFileNoCommited()
-	popupMultiselection("Adicionar arquivos ao commit", files, function(selectedItems)
-		popupSelectTemplate(function(template)
-			applyTemplate(template, function(commit)
+	local files = M.getGitFileNoCommited()
+	M.popupMultiselection("Adicionar arquivos ao commit", files, function(selectedItems)
+		M.popupSelectTemplate(function(template)
+			M.applyTemplate(template, function(commit)
 				local commandAdd = "add " .. table.concat(selectedItems, " ")
 				local commandCommit = "commit -m '" .. commit:gsub("'", "\\'") .. "'"
 				print(commandAdd)
 				print(commandCommit)
 				vim.cmd(":Git " .. commandAdd)
 				vim.cmd(":Git " .. commandCommit)
-				-- vim.cmd("lua require('git.cmd').cmd('add " ..  .. "')")
-				-- vim.cmd("lua require('git.cmd').cmd('commit -m \"" .. commit .. "\")")
 			end)
 		end)
 	end)
 end
 
 M.setup = function(opts)
-	TEMPLATES = opts.templates
+	M.TEMPLATES = opts.templates
+	local keymaps = opts.keymaps
 	if vim.fn.executable("git") == 0 then
 		vim.notify(
 			"git-commit-tool: Git não está instalado! Este plugin pode não funcionar corretamente.",
@@ -156,5 +160,8 @@ M.setup = function(opts)
 		nargs = 0,
 		desc = "Inicia a construção de um commit",
 	})
+	if keymaps then
+		vim.api.nvim_set_keymap("n", "<Leader>G", ":GitCommitToolAddCommit<CR>", { silent = true })
+	end
 end
 return M
