@@ -12,7 +12,8 @@ local function getArgs(event)
 end
 
 M.setToken = function(username, token)
-	vim.fn.system("git config --global credential.helper store")
+	vim.cmd(": lua require('git.cmd').cmd('git config --global credential.helper store')")
+	vim.cmd(": lua git.cmd('git config --global credential.helper store')")
 	vim.fn.system(string.format('echo "https://%s:%s@github.com" > ~/.git-credentials', username, token))
 end
 local function getGitFileNoCommited()
@@ -20,7 +21,7 @@ local function getGitFileNoCommited()
 	local files = {}
 	for line in handle:gmatch("[^\r\n]+") do
 		local status, file = line:match("^%s*(%S+)%s+(.*)")
-		if status and (status == "M" or status == "??") then
+		if status and (status == "MM" or status == "M" or status == "??") then
 			table.insert(files, "( ):" .. file)
 		end
 	end
@@ -101,6 +102,7 @@ local function applyTemplate(template, on_commit)
 				if value then
 					popupSetVar(value)
 				else
+					vim.api.nvim_win_close(win_id, true)
 					on_commit(commit)
 				end
 			end,
@@ -114,8 +116,8 @@ function M.buildCommitUi()
 	popupMultiselection("Adicionar arquivos ao commit", files, function(selectedItems)
 		popupSelectTemplate(function(template)
 			applyTemplate(template, function(commit)
-				-- git add " .. table.concat(selectedItems, " ") .. " && " ..
-				vim.fn.command(': e git commit -m "' .. commit .. '"')
+				vim.cmd("lua require('git.cmd').cmd('add " .. table.concat(selectedItems, " ") .. "')")
+				vim.cmd("lua require('git.cmd').cmd('commit -m \"" .. commit .. "\")")
 			end)
 		end)
 	end)
