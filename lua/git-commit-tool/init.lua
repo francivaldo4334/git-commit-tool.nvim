@@ -102,7 +102,7 @@ local function applyTemplate(template, on_commit)
 				if value then
 					popupSetVar(value)
 				else
-					vim.api.nvim_win_close(win_id, true)
+					-- vim.api.nvim_win_close(win_id, true)
 					on_commit(commit)
 				end
 			end,
@@ -116,8 +116,14 @@ function M.buildCommitUi()
 	popupMultiselection("Adicionar arquivos ao commit", files, function(selectedItems)
 		popupSelectTemplate(function(template)
 			applyTemplate(template, function(commit)
-				vim.cmd("lua require('git.cmd').cmd('add " .. table.concat(selectedItems, " ") .. "')")
-				vim.cmd("lua require('git.cmd').cmd('commit -m \"" .. commit .. "\")")
+				local commandAdd = "add " .. table.concat(selectedItems, " ")
+				local commandCommit = "commit -m '" .. commit:gsub("'", "\\'") .. "'"
+				print(commandAdd)
+				print(commandCommit)
+				vim.cmd(":Git " .. commandAdd)
+				vim.cmd(":Git " .. commandCommit)
+				-- vim.cmd("lua require('git.cmd').cmd('add " ..  .. "')")
+				-- vim.cmd("lua require('git.cmd').cmd('commit -m \"" .. commit .. "\")")
 			end)
 		end)
 	end)
