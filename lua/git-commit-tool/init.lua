@@ -68,7 +68,6 @@ function M.popupMultiselection(title, items, on_select_items, default_line)
 end
 
 function M.popupSelectTemplate(on_select)
-	print(vim.inspect(M.TEMPLATES))
 	popup.create(M.TEMPLATES, {
 		title = "Selecionar template",
 		cursorline = true,
@@ -123,8 +122,6 @@ function M.buildCommitUi()
 			M.applyTemplate(template, function(commit)
 				local commandAdd = "add " .. table.concat(selectedItems, " ")
 				local commandCommit = "commit -m '" .. commit:gsub("'", "\\'") .. "'"
-				print(commandAdd)
-				print(commandCommit)
 				vim.cmd(":Git " .. commandAdd)
 				vim.cmd(":Git " .. commandCommit)
 			end)
