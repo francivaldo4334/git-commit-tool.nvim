@@ -99,12 +99,17 @@ function M.applyTemplate(template, on_commit)
 	popupSetVar(value)
 end
 
-function M.run_command(command)
+function M.run_command(command, callback)
 	local result = vim.fn.system(command)
 	if vim.v.shell_error == 0 then
 		vim.notify("Comando executado com sucesso: " .. command)
+		if callback then
+			callback(result)
+		end
+		return true
 	else
 		vim.notify(string.format("Erro ao executar comando: %s, error: %s", command, result), vim.log.levels.ERROR)
+		return false
 	end
 end
 
@@ -119,21 +124,15 @@ function M.buildCommitUi()
 			M.applyTemplate(template, function(commit)
 				local handledCommit = commit:gsub("'", "\\'")
 				local handledAdd = table.concat(selectedItems, " ")
-				local commandAdd = ""
-				if handledAdd then
-					commandAdd = "add " .. handledAdd
-				else
-					commandAdd = "add ."
-				end
-				local commandCommit = ""
-				if handledCommit then
-					commandCommit = "commit -m '" .. handledCommit .. "'"
-				else
-					commandCommit = "commit -a"
-				end
-				M.run_command("git " .. commandAdd)
-				M.run_command("git " .. commandCommit)
-				M.run_command("git push")
+				M.run_command("git rev-parse --show-toplevel", function(path)
+					if vim.fn.isdirectory(path) == 0 then
+						M.run_command(string.format("cd %s; git add %s", path, handledAdd), function()
+							M.run_command(string.format('cd %s; git commit -m "%s"', path, handledCommit), function()
+								M.run_command("cd %s; git push")
+							end)
+						end)
+					end
+				end)
 			end)
 		end)
 	end)
@@ -141,7 +140,7 @@ end
 
 M.setup = function(opts)
 	M.TEMPLATES = opts.templates
-	local keymaps = opts.use_keymaps
+	local keymaps = opts.usekeymaps
 	if vim.fn.executable("git") == 0 then
 		vim.notify(
 			"git-commit-tool: Git não está instalado! Este plugin pode não funcionar corretamente.",
