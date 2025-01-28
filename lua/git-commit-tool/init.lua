@@ -101,8 +101,8 @@ function M.applyTemplate(template, on_commit)
 end
 
 function M.run_command(command)
-	local result = os.execute(command)
-	if result == 0 then
+	local result = vim.fn.system(command)
+	if vim.v.shell_error == 0 then
 		vim.notify("Comando executado com sucesso: " .. command)
 	else
 		vim.notify("Erro ao executar comando: " .. command, vim.log.levels.ERROR)
