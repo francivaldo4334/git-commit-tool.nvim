@@ -12,9 +12,8 @@ local function getArgs(event)
 end
 
 M.setToken = function(username, token)
-	vim.cmd(": lua require('git.cmd').cmd('git config --global credential.helper store')")
-	vim.cmd(": lua git.cmd('git config --global credential.helper store')")
-	vim.fn.system(string.format('echo "https://%s:%s@github.com" > ~/.git-credentials', username, token))
+	M.run_command("git config --global credential.helper store")
+	M.run_command(string.format('echo "https://%s:%s@github.com" > ~/.git-credentials', username, token))
 end
 function M.getGitFileNoCommited()
 	local handle = vim.fn.system("git status --porcelain") .. "\n"
@@ -142,7 +141,7 @@ end
 
 M.setup = function(opts)
 	M.TEMPLATES = opts.templates
-	local keymaps = opts.keymaps
+	local keymaps = opts.use_keymaps
 	if vim.fn.executable("git") == 0 then
 		vim.notify(
 			"git-commit-tool: Git não está instalado! Este plugin pode não funcionar corretamente.",

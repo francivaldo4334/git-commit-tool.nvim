@@ -11,10 +11,6 @@ return {
   "francivaldo4334/git-commit-tool.nvim",
   dependencies = {
     "nvim-lua/plenary.nvim",
-    {
-      "dinhhuy258/git.nvim",
-      opts = {}
-    },
   },
   opts={
     templates = {
@@ -23,7 +19,7 @@ return {
       ":construction: {{COMMIT}}",
       ":recycle: refactor: {{COMMIT}}",
     },
-    keymaps = true
+    use_keymaps = true
   },
 }
 ```
