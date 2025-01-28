@@ -91,7 +91,7 @@ function M.applyTemplate(template, on_commit)
 		key, value = next(vars, key)
 		if value then
 			popupSetVar(value)
-		else
+		elseif #commit > 0 then
 			on_commit(commit)
 		end
 	end
