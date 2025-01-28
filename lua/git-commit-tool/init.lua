@@ -21,9 +21,7 @@ function M.getGitFileNoCommited()
 	local files = {}
 	for line in handle:gmatch("[^\r\n]+") do
 		local status, file = line:match("^%s*(%S+)%s+(.*)")
-		if status and (status == "MM" or status == "M" or status == "??") then
-			table.insert(files, "( ):" .. file)
-		end
+		table.insert(files, "( ):" .. status .. " " .. file)
 	end
 	return files
 end
@@ -89,35 +87,34 @@ function M.applyTemplate(template, on_commit)
 		table.insert(vars, it)
 	end
 	local function popupSetVar(var)
-		popup.create("", {
-			title = "Insira o valor de " .. var,
-			lines = 1,
-			width = 40,
-			height = 4,
-			borderchars = borderchars,
-			enter = true,
-			callback = function(win_id, _)
-				local buf = vim.api.nvim_win_get_buf(win_id)
-				local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-				local text = table.concat(lines, "\n")
-				commit = commit:gsub(var, text)
-				key, value = next(vars, key)
-				if value then
-					popupSetVar(value)
-				else
-					-- vim.api.nvim_win_close(win_id, true)
-					on_commit(commit)
-				end
-			end,
-		})
+		text = vim.fn.input("Insira o valor de " .. var)
+		commit:gsub(var, text)
+		key, value = next(vars, key)
+		if value then
+			popupSetVar(value)
+		else
+			on_commit(commit)
+		end
 	end
 	key, value = next(vars)
 	popupSetVar(value)
 end
 
+function M.run_command(command)
+	local result = os.execute(command)
+	if result == 0 then
+		vim.notify("Comando executado com sucesso: " .. command)
+	else
+		vim.notify("Erro ao executar comando: " .. command, vim.log.levels.ERROR)
+	end
+end
+
 function M.buildCommitUi()
 	local files = M.getGitFileNoCommited()
 	M.popupMultiselection("Adicionar arquivos ao commit", files, function(selectedItems)
+		for i, item in ipairs(selectedItems) do
+			selectedItems[i] = item:sub(3)
+		end
 		M.popupSelectTemplate(function(template)
 			M.applyTemplate(template, function(commit)
 				local handledCommit = commit:gsub("'", "\\'")
@@ -134,9 +131,9 @@ function M.buildCommitUi()
 				else
 					commandCommit = "commit -a"
 				end
-				vim.cmd(":Git " .. commandAdd)
-				vim.cmd(":Git " .. commandCommit)
-				vim.cmd(":Git push")
+				M.run_command("git " .. commandAdd)
+				M.run_command("git " .. commandCommit)
+				M.run_command("git push")
 			end)
 		end)
 	end)
