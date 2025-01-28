@@ -105,7 +105,7 @@ function M.run_command(command)
 	if vim.v.shell_error == 0 then
 		vim.notify("Comando executado com sucesso: " .. command)
 	else
-		vim.notify("Erro ao executar comando: " .. command, vim.log.levels.ERROR)
+		vim.notify(string.format("Erro ao executar comando: %s, error: %s", command, result), vim.log.levels.ERROR)
 	end
 end
 
