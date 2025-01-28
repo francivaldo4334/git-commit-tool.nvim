@@ -111,6 +111,7 @@ end
 
 function M.buildCommitUi()
 	local files = M.getGitFileNoCommited()
+	table.insert(files, "( ):AL .")
 	M.popupMultiselection("Adicionar arquivos ao commit", files, function(selectedItems)
 		for i, item in ipairs(selectedItems) do
 			selectedItems[i] = item:sub(3)
