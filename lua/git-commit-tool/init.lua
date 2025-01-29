@@ -86,8 +86,8 @@ function M.applyTemplate(template, on_commit)
 		table.insert(vars, it)
 	end
 	local function popupSetVar(var)
-		text = vim.fn.input("Insira o valor de " .. var)
-		commit:gsub(var, text)
+		local text = vim.fn.input("Insira o valor de " .. var)
+		commit = commit:gsub(var, text)
 		key, value = next(vars, key)
 		if value then
 			popupSetVar(value)
