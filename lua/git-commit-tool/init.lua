@@ -128,7 +128,7 @@ function M.buildCommitUi()
 					if vim.fn.isdirectory(path) == 0 then
 						M.run_command(string.format("cd %s\n git add %s", path, handledAdd), function()
 							M.run_command(string.format('cd %s \n git commit -m "%s"', path, handledCommit), function()
-								M.run_command("cd %s \n git push", path)
+								M.run_command(string.format("cd %s \n git push", path))
 							end)
 						end)
 					end
