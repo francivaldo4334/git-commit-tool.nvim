@@ -87,12 +87,17 @@ function M.applyTemplate(template, on_commit)
 	end
 	local function popupSetVar(var)
 		local text = vim.fn.input("Insira o valor de " .. var)
-		commit = commit:gsub(var, text)
-		key, value = next(vars, key)
-		if value then
-			popupSetVar(value)
-		elseif #commit > 0 then
-			on_commit(commit)
+		if text == "" then
+			vim.notify("Operação cancelada.", vim.log.levels.INFO)
+			return
+		else
+			commit = commit:gsub(var, text)
+			key, value = next(vars, key)
+			if value then
+				popupSetVar(value)
+			elseif #commit > 0 then
+				on_commit(commit)
+			end
 		end
 	end
 	key, value = next(vars)
