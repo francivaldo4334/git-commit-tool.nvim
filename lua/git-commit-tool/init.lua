@@ -127,8 +127,8 @@ function M.buildCommitUi()
 				M.run_command("git rev-parse --show-toplevel", function(path)
 					if vim.fn.isdirectory(path) == 0 then
 						M.run_command(string.format("cd %s\n git add %s", path, handledAdd), function()
-							M.run_command(string.format('cd %s \n git commit -m "%s"', path, handledCommit), function()
-								M.run_command(string.format("cd %s \n git push", path))
+							M.run_command(string.format('git commit -m "%s"', handledCommit), function()
+								M.run_command("git push")
 							end)
 						end)
 					end
