@@ -102,7 +102,7 @@ end
 function M.run_command(command, callback)
 	local result = vim.fn.system(command)
 	if vim.v.shell_error == 0 then
-		vim.notify("Comando executado com sucesso: " .. command)
+		-- vim.notify("Comando executado com sucesso: " .. command)
 		if callback then
 			callback(result)
 		end
@@ -122,17 +122,22 @@ function M.buildCommitUi()
 		end
 		M.popupSelectTemplate(function(template)
 			M.applyTemplate(template, function(commit)
-				local handledCommit = commit:gsub("'", "\\'")
-				local handledAdd = table.concat(selectedItems, " ")
-				M.run_command("git rev-parse --show-toplevel", function(path)
-					if vim.fn.isdirectory(path) == 0 then
-						M.run_command(string.format("cd %s\n git add %s", path, handledAdd), function()
-							M.run_command(string.format("git commit -m \"%s\"", handledCommit), function()
-								M.run_command("git push")
+				local coro = coroutine.create(function()
+					local handledCommit = commit:gsub("'", "\\'")
+					local handledAdd = table.concat(selectedItems, " ")
+					M.run_command("git rev-parse --show-toplevel", function(path)
+						if vim.fn.isdirectory(path) == 0 then
+							M.run_command(string.format("cd %s\n git add %s", path, handledAdd), function()
+								M.run_command(string.format("git commit -m \"%s\"", handledCommit), function()
+									M.run_command("git push", function()
+										vim.notify("Commit realizado com sucesso!")
+									end)
+								end)
 							end)
-						end)
-					end
+						end
+					end)
 				end)
+				coroutine.resume(coro)
 			end)
 		end)
 	end)
