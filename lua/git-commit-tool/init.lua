@@ -176,8 +176,15 @@ M.setup = function(opts)
 		nargs = 0,
 		desc = "Inicia a construção de um commit",
 	})
+	vim.api.nvim_create_user_command("GitCommitToolPush", function()
+		M.run_command("git push")
+	end, {
+		nargs = 0,
+		desc = "Realiza um push",
+	})
 	if keymaps then
 		vim.api.nvim_set_keymap("n", "<Leader>G", ":GitCommitToolAddCommit<CR>", { silent = true })
+		vim.api.nvim_set_keymap("n", "<Leader>P", ":GitCommitToolPush<CR>", { silent = true })
 	end
 end
 return M
