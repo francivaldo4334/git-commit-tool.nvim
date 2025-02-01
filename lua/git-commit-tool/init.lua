@@ -177,7 +177,9 @@ M.setup = function(opts)
 		desc = "Inicia a construção de um commit",
 	})
 	vim.api.nvim_create_user_command("GitCommitToolPush", function()
-		M.run_command("git push")
+		M.run_command("git push", function()
+			vim.notify("Alteraçoes salvas")
+		end)
 	end, {
 		nargs = 0,
 		desc = "Realiza um push",
